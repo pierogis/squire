@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "squire"
+version = "0.1.0"
+description = "a strange discord bot"
+authors = ["Kyle Moore <moore.kyle39@gmail.com>"]
+license = "AGPL-3.0"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+openai = "^0.11.5"
+python-dotenv = "^0.19.2"
+"discord.py" = "^1.7.3"
+click = "^8.0.3"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

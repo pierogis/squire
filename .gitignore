@@ -1,0 +1,13 @@
+# generated
+*.py[cod]
+*dist*
+*build*
+*.egg*
+*.so
+
+# venv
+.env
+
+# editor
+.vscode
+.idea
