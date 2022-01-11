@@ -1,5 +1,5 @@
 from discord import Client, Message
-from discord.reaction import Reaction
+import discord
 import gpt3
 
 
@@ -15,7 +15,7 @@ def create_client(temperature: float) -> Client:
         if message.author == client.user:
             return
 
-        if message.content.startswith("$lyrics"):
+        if message.content.startswith("/lyrics"):
             args = message.content.split(" ", 2)
             try:
                 if len(args) > 1:
@@ -37,7 +37,7 @@ def create_client(temperature: float) -> Client:
             except Exception as e:
                 print(e)
 
-        if message.content.startswith("$ramble"):
+        if message.content.startswith("/ramble"):
             args = message.content.split(" ", 2)
             try:
                 if len(args) > 1:

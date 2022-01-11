@@ -1,8 +1,21 @@
 # generated
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
 *.py[cod]
-*dist*
-*build*
-*.egg*
 *.so
 
 # venv
@@ -11,3 +24,6 @@
 # editor
 .vscode
 .idea
+
+# Serverless directories
+.serverless
