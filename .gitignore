@@ -4,6 +4,7 @@ env/
 build/
 develop-eggs/
 dist/
+package/
 downloads/
 eggs/
 .eggs/
@@ -20,6 +21,7 @@ var/
 
 # venv
 .env
+.venv
 
 # editor
 .vscode
