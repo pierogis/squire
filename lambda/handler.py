@@ -2,15 +2,13 @@ import os
 from enum import Enum
 
 import openai
-from chalice import Chalice
 from nacl.signing import VerifyKey
 
 import squire
 
-app = Chalice(app_name='squire')
-
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 discord_token = os.environ.get("DISCORD_TOKEN")
+discord_public_key = os.environ.get("DISCORD_PUBLIC_KEY")
 
 
 class ResponseType(Enum):
@@ -27,24 +25,23 @@ def _verify_signature(event):
     auth_ts = event['params']['header'].get('x-signature-timestamp')
 
     message = auth_ts.encode() + raw_body.encode()
-    verify_key = VerifyKey(bytes.fromhex(discord_token))
+    verify_key = VerifyKey(bytes.fromhex(discord_public_key))
     verify_key.verify(message, bytes.fromhex(auth_sig))
 
 
-@app.route('/', methods=['POST'], cors=True)
 def interaction(event, context):
-    print(f"event {event}")
+    print(f"event: {event}")
 
     _verify_signature(event)
 
     body = event.get('body-json')
-    if body.get("type") == ResponseType.pong:
+    if ResponseType(body.get("type")) == ResponseType.pong:
         return {
-            "type": ResponseType.PONG,
+            "type": ResponseType.pong.value,
         }
     else:
         return {
-            "type": ResponseType.message_no_source,
+            "type": ResponseType.message_no_source.value,
             "data": {
                 "tts": False,
                 "content": body.get("data").get('content'),

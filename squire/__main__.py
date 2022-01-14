@@ -19,7 +19,7 @@ def ramble(temperature: float):
     spiel: str = gpt3.ramble(prompt, temperature=temperature)
     print()
     print("spiel:\n")
-    print(prompt + spiel.strip())
+    print(prompt + " " + spiel.strip())
 
 
 @cli.command()
