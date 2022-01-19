@@ -17,7 +17,7 @@ def generate_lyrics(
         frequency_penalty=frequency_penalty,
     )
 
-    return response["choices"][0]["text"]
+    return response["choices"][0]["text"].strip()
 
 
 def ramble(
@@ -34,4 +34,4 @@ def ramble(
         frequency_penalty=frequency_penalty,
     )
 
-    return response["choices"][0]["text"]
+    return response["choices"][0]["text"].strip()

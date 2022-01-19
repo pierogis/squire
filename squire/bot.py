@@ -1,6 +1,5 @@
 from discord import Client, Message
-import discord
-import gpt3
+from squire import gpt3
 
 
 def create_client(temperature: float) -> Client:
