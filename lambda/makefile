@@ -23,6 +23,12 @@ lambda:
 	  "public.ecr.aws/sam/build-python3.9" \
 	  /bin/sh -c "cd lambda; . ./build.sh"
 
+
+.PHONY: slash
+slash:
+	python -m slash
+
+
 .PHONY: clean
 clean:
 	rm -rf dist
