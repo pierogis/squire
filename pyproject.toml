@@ -8,9 +8,9 @@ license = "AGPL-3.0"
 [tool.poetry.dependencies]
 python = "^3.8.0"
 openai = "^0.11.5"
-"discord.py" = "^1.7.3"
 click = "^8.0.3"
-python-dotenv = {version = "^0.19.2", extras = [".env"]}
+"discord.py" = { version = "^1.7.3", extras = ["discord"] }
+python-dotenv = { version = "^0.19.2", extras = [".env"] }
 
 [tool.poetry.scripts]
 squire = 'squire.main:main'

@@ -3,7 +3,6 @@ import click
 import openai
 
 from squire import gpt3
-from squire import bot
 
 
 def set_openai_key():
@@ -55,11 +54,17 @@ def lyrics(temperature: float):
 @app.command()
 @click.option('--temperature', default=0.8, help='creativity scale')
 def discord_bot(temperature: float):
-    client = bot.create_client(temperature)
+    try:
+        from squire import bot
 
-    discord_token = os.environ.get("DISCORD_BOT_TOKEN")
+        client = bot.create_client(temperature)
 
-    if discord_token is None:
-        discord_token = input("discord token:")
+        discord_token = os.environ.get("DISCORD_BOT_TOKEN")
 
-    client.run(discord_token)
+        if discord_token is None:
+            discord_token = input("discord token:")
+
+        client.run(discord_token)
+
+    except ImportError as e:
+        print("discord.py package not installed: run `pip install squire[discord]`")
