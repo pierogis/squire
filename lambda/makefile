@@ -1,48 +1,24 @@
-all: layers lambdas
+.PHONY: build-NumpyLayer
+build-NumpyLayer:
+	pip install -r $(PWD)/layers/numpy/requirements.txt --target $(ARTIFACTS_DIR)/python --no-deps
 
-.PHONY: layers
-layers:
-	mkdir -p dist
-	docker run \
-	  --rm -it \
-	  --name squire-build-layers \
-	  --mount type=bind,source=$(PWD)/layers,target=/var/task/lambda/layers \
-	  --mount type=bind,source=$(PWD)/dist,target=/var/task/lambda/dist \
-	  "public.ecr.aws/sam/build-python3.9" \
-	  /bin/sh -c "cd lambda/layers; . ./build.sh"
+.PHONY: build-PandasLayer
+build-PandasLayer:
+	pip install -r $(PWD)/layers/pandas/requirements.txt --target $(ARTIFACTS_DIR)/python --no-deps
 
+.PHONY: build-OpenaiLayer
+build-OpenaiLayer:
+	pip install -r $(PWD)/layers/openai/requirements.txt --target $(ARTIFACTS_DIR)/python --no-deps
 
-.PHONY: command
-command:
-	mkdir -p dist
-	docker run \
-	  --rm -it \
-	  --name squire-build-command \
-	  --mount type=bind,source=$(PWD)/dist,target=/var/task/lambda/dist \
-	  --mount type=bind,source=$(PWD)/command,target=/var/task/lambda/command \
-	  --mount type=bind,source=$(PWD)/../squire,target=/var/task/squire,readonly \
-	  --mount type=bind,source=$(PWD)/../pyproject.toml,target=/var/task/pyproject.toml,readonly \
-	  "public.ecr.aws/sam/build-python3.9" \
-	  /bin/sh -c "cd lambda/command; . ./build.sh"
+.PHONY: build-PynaclLayer
+build-PynaclLayer:
+	pip install -r $(PWD)/layers/pynacl/requirements.txt --target $(ARTIFACTS_DIR)/python --no-deps
 
-.PHONY: interaction
-interaction:
-	mkdir -p dist
-	docker run \
-	  --rm -it \
-	  --name squire-build-interaction \
-	  --mount type=bind,source=$(PWD)/dist,target=/var/task/lambda/dist \
-	  --mount type=bind,source=$(PWD)/interaction,target=/var/task/lambda/interaction,readonly \
-	  "public.ecr.aws/sam/build-python3.9" \
-	  /bin/sh -c "cd lambda/interaction; . ./build.sh"
+.PHONY: build-CommandFunction
+build-CommandFunction:
+	pip install $(PWD)/.. -t $(ARTIFACTS_DIR) --no-deps
+	cp $(PWD)/command/handler.py $(ARTIFACTS_DIR)/handler.py
 
-lambdas: interaction command
-
-.PHONY: slash
-slash:
-	python -m slash
-
-
-.PHONY: clean
-clean:
-	rm -rf dist
+.PHONY: build-InteractionFunction
+build-InteractionFunction:
+	cp $(PWD)/interaction/handler.py $(ARTIFACTS_DIR)/handler.py

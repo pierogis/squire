@@ -69,7 +69,7 @@ def command(event, context):
     application_id = event['application_id']
     command_data = event['command_data']
 
-    command_name = command_data.get('name')
+    command_name = command_data['name']
     options: List[Dict[str, any]] = command_data.get('options')
 
     if command_name in SLASH_COMMAND_HANDLERS:

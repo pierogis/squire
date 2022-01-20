@@ -19,7 +19,7 @@ var/
 *.py[cod]
 *.so
 
-# venv
+# env
 .env
 .venv
 
