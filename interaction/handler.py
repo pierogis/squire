@@ -27,9 +27,9 @@ class InteractionCallbackType(Enum):
 
 
 def _verify_signature(event):
-    raw_body = event.get("rawBody")
-    auth_sig = event['params']['header'].get('x-signature-ed25519')
-    auth_ts = event['params']['header'].get('x-signature-timestamp')
+    raw_body = event["rawBody"]
+    auth_sig = event['params']['header']['x-signature-ed25519']
+    auth_ts = event['params']['header']['x-signature-timestamp']
 
     message = auth_ts.encode() + raw_body.encode()
     verify_key = VerifyKey(bytes.fromhex(discord_public_key))
@@ -42,7 +42,7 @@ def interaction(event: Dict[str, any], context):
     """
     _verify_signature(event)
 
-    body = event['body-json']
+    body = event['body']
 
     if InteractionType(body["type"]) == InteractionType.PING:
         print("pong")

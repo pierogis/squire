@@ -27,5 +27,5 @@ var/
 .vscode
 .idea
 
-# Serverless directories
-.serverless
+.aws-sam
+env.json

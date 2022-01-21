@@ -16,18 +16,18 @@ To use the commands standalone (outside discord):
 
 `squire ramble {artist} --temperature {temperature}`
 
-Provide api keys through the environment/.env file (see [configuration](#configuration))
+Provide api keys through the environment/`.env` file (see `.env-template`)
 or enter them when prompted
 
 ## slash commands
 
 The `lambda` dir contains directions for setting up lambda function that handles slash commands
 
-`/lyrics {artist} artistic_liberty:{artistic_liberty}`
+`/lyrics artist:{artist} artistic_liberty:{artistic_liberty}`
 
 Creates a verse based on `artist`
 
-`/ramble {prompt} artistic_liberty:{artistic_liberty}`
+`/ramble artist:{prompt} artistic_liberty:{artistic_liberty}`
 
 Rambles on, continuing optional `prompt`
 
@@ -35,27 +35,40 @@ Optional value `artistic_liberty` is roughly how creative you want the bot to be
 
 ## hosting
 
-##### listener
+### lambda
 
-Create an aws instance and run an event listener using the `discord.py` library
+You can use this package as an aws lambda function that will receive events from discord via http
 
-`poetry run python squire discord-bot`
+There is a sam template that will create an aws lambda function, lambda layers, and api gateway trigger to handle these
+interaction events
 
-##### lambda
+You will need to install `aws cli`, `sam` and create an IAM access key on aws, then:
 
-Create an aws lambda function, lambda layer, and api gateway trigger to handle discord events
+```shell
+aws configure
+sam build --use-container
+sam deploy --guided
+```
 
-See `lambda` directory for more information
+Finally, [register](#register) the slash command with discord.
 
-## configuration
+#### build
 
-To run the bot, it needs access to a discord bot token and an openai token.
+`make build` will use `sam build`, but first remove the .venv directory (if present) since it causes issues with the
+docker build.
 
-Commands will prompt for these keys.
+#### register
 
-Config can also be provided in a `.env` file at the working directory for local requests/bot hosting.
+`make slash` will call a python module (`slash.py`) that registers slash commands `/lyrics` `/ramble`
 
-See/copy `.env-template` for required keys.
+Use the `.env-template` and `pip install -r requirements-dev.txt` to provide information needed to register the slash
+commands with discord.
 
 `pip install python-dotenv` to install the loader package for this method
 (installed by command provided in [install](#install))
+
+### listener
+
+Create an aws instance and run a stinky event listener using the `discord.py` library
+
+`poetry run python squire discord-bot`
