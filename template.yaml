@@ -82,27 +82,27 @@ Resources:
 
                     #set($allParams = $input.params())
                     {
-                    "rawBody": "$util.escapeJavaScript($input.body).replace("\'", "'")",
-                    "body-json" : $input.json('$'),
-                    "params" : {
-                    #foreach($type in $allParams.keySet())
-                        #set($params = $allParams.get($type))
-                    "$type" : {
-                        #foreach($paramName in $params.keySet())
-                        "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
-                            #if($foreach.hasNext),#end
+                      "rawBody": "$util.escapeJavaScript($input.body).replace("\'", "'")",
+                      "body" : $input.json('$'),
+                      "params" : {
+                        #foreach($type in $allParams.keySet())
+                          #set($params = $allParams.get($type))
+                        "$type" : {
+                          #foreach($paramName in $params.keySet())
+                          "$paramName" : "$util.escapeJavaScript($params.get($paramName))"
+                              #if($foreach.hasNext),#end
+                          #end
+                        }
+                          #if($foreach.hasNext),#end
                         #end
-                    }
-                        #if($foreach.hasNext),#end
-                    #end
-                    },
-                    "stage-variables" : {
-                    #foreach($key in $stageVariables.keySet())
-                    "$key" : "$util.escapeJavaScript($stageVariables.get($key))"
-                        #if($foreach.hasNext),#end
-                    #end
-                    },
-                    "context" : {
+                      },
+                      "stage-variables" : {
+                        #foreach($key in $stageVariables.keySet())
+                        "$key" : "$util.escapeJavaScript($stageVariables.get($key))"
+                          #if($foreach.hasNext),#end
+                        #end
+                      },
+                      "context" : {
                         "account-id" : "$context.identity.accountId",
                         "api-id" : "$context.apiId",
                         "api-key" : "$context.identity.apiKey",
@@ -121,7 +121,7 @@ Resources:
                         "request-id" : "$context.requestId",
                         "resource-id" : "$context.resourceId",
                         "resource-path" : "$context.resourcePath"
-                        }
+                      }
                     }
                 contentHandling: "CONVERT_TO_TEXT"
                 type: "aws"
