@@ -33,9 +33,10 @@ jobs:
           make build
 
           sam deploy --stack-name ${{ env.STACK_NAME }} \
+                --s3-bucket ${{ env.STACK_NAME }} \
                 --parameter-overrides\
                 'ParameterKey=DiscordPublicKeyParameter,ParameterValue=${{ secrets.DISCORD_PUBLIC_KEY }} \
-                ParameterKey=OpenaiApiKeyParameter,ParameterValue=${{ secrets.OPENAI_API_KEY }} \
-                ParameterKey=CertificateArnParameter,ParameterValue=${{ secrets.CERTIFICATE_ARN }} \
-                ParameterKey=CustomDomainParameter,ParameterValue=${{ secrets.CUSTOM_DOMAIN }}' \
+                  ParameterKey=OpenaiApiKeyParameter,ParameterValue=${{ secrets.OPENAI_API_KEY }} \
+                  ParameterKey=CertificateArnParameter,ParameterValue=${{ secrets.CERTIFICATE_ARN }} \
+                  ParameterKey=CustomDomainParameter,ParameterValue=${{ secrets.CUSTOM_DOMAIN }}' \
                 --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
