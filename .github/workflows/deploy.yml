@@ -33,7 +33,8 @@ jobs:
           make build
 
           sam deploy --stack-name ${{ env.STACK_NAME }} \
-                --s3-bucket ${{ env.STACK_NAME }} \
+                --s3-bucket pierogis-squire \
+                --s3-prefix deploy \
                 --parameter-overrides\
                 'ParameterKey=DiscordPublicKeyParameter,ParameterValue=${{ secrets.DISCORD_PUBLIC_KEY }} \
                   ParameterKey=OpenaiApiKeyParameter,ParameterValue=${{ secrets.OPENAI_API_KEY }} \
