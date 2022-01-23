@@ -3,7 +3,7 @@ name: deploy with sam
 on:
   push:
     tags:
-      - '*'
+      - 'v*.*.*'
 
 env:
   AWS_REGION: us-east-1
@@ -34,7 +34,7 @@ jobs:
 
           sam deploy --stack-name ${{ env.STACK_NAME }} \
                 --s3-bucket pierogis-squire \
-                --s3-prefix deploy/${{ steps.vars.outputs.tag }} \
+                --s3-prefix deploy/${{ github.ref_name }} \
                 --parameter-overrides\
                 'ParameterKey=DiscordPublicKeyParameter,ParameterValue=${{ secrets.DISCORD_PUBLIC_KEY }} \
                   ParameterKey=OpenaiApiKeyParameter,ParameterValue=${{ secrets.OPENAI_API_KEY }} \
