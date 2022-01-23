@@ -1,0 +1,41 @@
+name: deploy with sam
+
+on:
+  push:
+    tags:
+      - '*'
+
+env:
+  AWS_REGION: us-east-1
+  STACK_NAME: squire
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: setup AWS SAM CLI
+        uses: aws-actions/setup-sam@v1
+
+      - name: build and sam deploy
+        id: build-image
+        run: |
+          make build
+
+          sam deploy --stack-name ${{ env.STACK_NAME }} \
+                --parameter-overrides\
+                'ParameterKey=DiscordPublicKeyParameter,ParameterValue=${{ secrets.DISCORD_PUBLIC_KEY }} \
+                ParameterKey=OpenaiApiKeyParameter,ParameterValue=${{ secrets.OPENAI_API_KEY }} \
+                ParameterKey=CertificateArnParameter,ParameterValue=${{ secrets.CERTIFICATE_ARN }} \
+                ParameterKey=CustomDomainParameter,ParameterValue=${{ secrets.CUSTOM_DOMAIN }}' \
+                --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM
