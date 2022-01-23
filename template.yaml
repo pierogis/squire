@@ -1,49 +1,79 @@
 Transform: 'AWS::Serverless-2016-10-31'
 Description: serverless specification for squire bots
+
+Parameters:
+  DiscordPublicKeyParameter:
+    Type: 'String'
+    Description: "discord public key used to authenticate from-discord post requests (found in Application -> General Information)"
+
+  OpenaiApiKeyParameter:
+    Type: 'String'
+    Description: "openai key used to make requests to the openai api"
+
+  CustomDomainParameter:
+    Type: 'String'
+    Description: "provide a custom domain name for the api"
+    Default: none
+
+  CertificateArnParameter:
+    Type: 'String'
+    Description: "provide a certificate arn for custom domain (if not provided, you will have to add a CNAME record to the domain's DNS)"
+    Default: none
+
+Conditions:
+  UseCustomDomain:
+    Fn::Not:
+      - Fn::Equals:
+          - Ref: CustomDomainParameter
+          - 'none'
+  CreateCert:
+    Fn::And:
+      - Condition: UseCustomDomain
+      - Fn::Equals:
+          - Ref: CertificateArnParameter
+          - 'none'
+
 Resources:
-  NumpyLayer:
-    Type: 'AWS::Serverless::LayerVersion'
+  GeneratedCert:
+    Type: AWS::CertificateManager::Certificate
+    Condition: CreateCert
     Properties:
-      ContentUri: .
-      CompatibleRuntimes:
-        - python3.9
-    Metadata:
-      BuildMethod: makefile
+      DomainName:
+        Ref: CustomDomainParameter
+      ValidationMethod: 'DNS'
 
-  PandasLayer:
-    Type: 'AWS::Serverless::LayerVersion'
+  CustomDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    Condition: UseCustomDomain
     Properties:
-      ContentUri: .
-      CompatibleRuntimes:
-        - python3.9
-    Metadata:
-      BuildMethod: makefile
+      DomainName:
+        Ref: CustomDomainParameter
+      DomainNameConfigurations:
+        - EndpointType: 'REGIONAL'
+          CertificateArn:
+            Fn::If:
+              - CreateCert
+              - Ref: GeneratedCert
+              - Ref: CertificateArnParameter
 
-  OpenaiLayer:
-    Type: 'AWS::Serverless::LayerVersion'
+  ApiDomainMapping:
+    Type: 'AWS::ApiGateway::BasePathMapping'
+    Condition: UseCustomDomain
     Properties:
-      ContentUri: .
-      CompatibleRuntimes:
-        - python3.9
-    Metadata:
-      BuildMethod: makefile
+      RestApiId:
+        Ref: InteractionsApi
+      DomainName:
+        Ref: CustomDomainName
+      Stage:
+        Ref: InteractionsApiProdStage
 
-  PynaclLayer:
-    Type: 'AWS::Serverless::LayerVersion'
+  InteractionsApi:
+    Type: 'AWS::Serverless::Api'
     Properties:
-      ContentUri: .
-      CompatibleRuntimes:
-        - python3.9
-    Metadata:
-      BuildMethod: makefile
-
-  InteractionApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName:
-        Ref: StageParameter
+      StageName: "Prod"
       EndpointConfiguration:
-        Type: REGIONAL
+        Type: 'REGIONAL'
+      OpenApiVersion: '2.0'
       DefinitionBody:
         swagger: '2.0'
         info:
@@ -54,9 +84,9 @@ Resources:
             post:
               summary: "discord interactions"
               consumes:
-                - "application/json"
+                - 'application/json'
               produces:
-                - "application/json"
+                - 'application/json'
               responses:
                 '200':
                   description: '200 response'
@@ -68,8 +98,8 @@ Resources:
                     statusCode: '200'
                   "'.[UNAUTHORIZED].'":
                     statusCode: '401'
-                passthroughBehavior: "when_no_templates"
-                httpMethod: "POST"
+                passthroughBehavior: 'when_no_templates'
+                httpMethod: 'POST'
                 requestTemplates:
                   application/json: >
                     ##  See http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-mapping-template-reference.html
@@ -123,8 +153,8 @@ Resources:
                         "resource-path" : "$context.resourcePath"
                       }
                     }
-                contentHandling: "CONVERT_TO_TEXT"
-                type: "aws"
+                contentHandling: 'CONVERT_TO_TEXT'
+                type: 'aws'
                 uri:
                   Fn::Sub:
                     - 'arn:aws:apigateway:${AWSRegion}:lambda:path/2015-03-31/functions/${FunctionArn}/invocations'
@@ -137,34 +167,70 @@ Resources:
             options:
               summary: "CORS support"
               consumes:
-                - "application/json"
+                - 'application/json'
               produces:
-                - "application/json"
+                - 'application/json'
               responses:
                 '200':
                   description: "200 response"
                   headers:
                     Access-Control-Allow-Origin:
-                      type: "string"
+                      type: 'string'
                     Access-Control-Allow-Headers:
-                      type: "string"
+                      type: 'string'
                     Access-Control-Allow-Methods:
-                      type: "string"
+                      type: 'string'
               x-amazon-apigateway-integration:
-                type: "mock"
+                type: 'mock'
                 responses:
                   default:
-                    statusCode: "200"
+                    statusCode: '200'
                     responseParameters:
-                      method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-                      method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-                      method.response.header.Access-Control-Allow-Origin: "'*'"
+                      method.response.header.Access-Control-Allow-Methods: '''POST,OPTIONS'''
+                      method.response.header.Access-Control-Allow-Headers: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+                      method.response.header.Access-Control-Allow-Origin: '''*'''
+
+  NumpyLayer:
+    Type: 'AWS::Serverless::LayerVersion'
+    Properties:
+      ContentUri: .
+      CompatibleRuntimes:
+        - 'python3.9'
+    Metadata:
+      BuildMethod: makefile
+
+  PandasLayer:
+    Type: 'AWS::Serverless::LayerVersion'
+    Properties:
+      ContentUri: .
+      CompatibleRuntimes:
+        - 'python3.9'
+    Metadata:
+      BuildMethod: makefile
+
+  OpenaiLayer:
+    Type: 'AWS::Serverless::LayerVersion'
+    Properties:
+      ContentUri: .
+      CompatibleRuntimes:
+        - 'python3.9'
+    Metadata:
+      BuildMethod: makefile
+
+  PynaclLayer:
+    Type: 'AWS::Serverless::LayerVersion'
+    Properties:
+      ContentUri: .
+      CompatibleRuntimes:
+        - 'python3.9'
+    Metadata:
+      BuildMethod: makefile
 
   CommandFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      Handler: handler.command
-      Runtime: python3.9
+      Handler: 'handler.command'
+      Runtime: 'python3.9'
       MemorySize: 128
       Timeout: 30
       Environment:
@@ -180,19 +246,20 @@ Resources:
 
   InteractionFunction:
     Type: 'AWS::Serverless::Function'
+    FunctionName: !Sub 'Interaction-${StageParameter}'
     Properties:
-      Handler: handler.interaction
-      Runtime: python3.9
+      Handler: 'handler.interaction'
+      Runtime: 'python3.9'
       MemorySize: 128
       Timeout: 3
       Events:
         ApiEvent:
-          Type: Api
+          Type: 'Api'
           Properties:
-            Path: "/interactions"
-            Method: "post"
+            Path: '/interactions'
+            Method: 'post'
             RestApiId:
-              Ref: InteractionApi
+              Ref: InteractionsApi
       Policies:
         - LambdaInvokePolicy:
             FunctionName:
@@ -208,16 +275,18 @@ Resources:
     Metadata:
       BuildMethod: makefile
 
-Parameters:
-  DiscordPublicKeyParameter:
-    Type: String
-    Description: 'discord public key used to authenticate from-discord post requests (found in Application -> General Information)'
-
-  OpenaiApiKeyParameter:
-    Type: String
-    Description: 'openai key used to make requests to the openai api'
-
-  StageParameter:
-    Type: String
-    Description: 'deploy to a specific stage'
-    Default: dev
+Outputs:
+  InteractionsEndpoint:
+    Description: "Discord interactions endpoint"
+    Value:
+      Fn::Sub:
+        - 'https://${Api}.execute-api.${AWSRegion}.amazonaws.com/Prod/interactions'
+        - Api:
+            Ref: InteractionsApi
+          AWSRegion:
+            Ref: AWS::Region
+  Certificate:
+    Condition: CreateCert
+    Description: "Add this certificate to your dns record"
+    Value:
+      Ref: GeneratedCert
