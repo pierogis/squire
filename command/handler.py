@@ -4,9 +4,9 @@ from typing import Dict, List, Callable, Optional
 import openai
 import requests
 
-from squire import gpt3
+from squire import gpt3, twitter
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+openai.api_key = os.environ["OPENAI_API_KEY"]
 
 
 def handle_lyrics_command(options: List[Dict[str, any]]) -> str:
@@ -24,13 +24,39 @@ def handle_lyrics_command(options: List[Dict[str, any]]) -> str:
 
     if artist is not None:
         if temperature is not None:
-            generated_lyrics = gpt3.generate_lyrics(artist, temperature)
+            lyrics = gpt3.generate_lyrics(artist, temperature)
         else:
-            generated_lyrics = gpt3.generate_lyrics(artist)
+            lyrics = gpt3.generate_lyrics(artist)
     else:
         raise Exception("No artist option provided")
 
-    return f"artist:\n{artist}\n\nlyrics:\n{generated_lyrics}"
+    return f"artist:\n{artist}\n\nlyrics:\n{lyrics}"
+
+
+def handle_tweet_command(options: List[Dict[str, any]]) -> str:
+    username = None
+    temperature = None
+    for option in options:
+        option_name = option.get('name')
+        option_value = option.get('value')
+
+        if option_name == 'username':
+            username = option_value
+
+        elif option_name == 'artistic_license':
+            temperature = option_value
+
+    if username is not None:
+        twitter_bearer_token = os.environ["TWITTER_BEARER_TOKEN"]
+        client = twitter.create_client(twitter_bearer_token)
+        if temperature is not None:
+            tweet = gpt3.generate_tweet(client, username, temperature)
+        else:
+            tweet = gpt3.generate_tweet(client, username)
+    else:
+        raise Exception("No artist option provided")
+
+    return f"@{username}\n{tweet}"
 
 
 def handle_ramble_command(options: Optional[List[Dict[str, any]]]) -> str:
@@ -61,6 +87,7 @@ def handle_ramble_command(options: Optional[List[Dict[str, any]]]) -> str:
 SLASH_COMMAND_HANDLERS: Dict[str, Callable[[List[Dict[str, any]]], str]] = {
     'lyrics': handle_lyrics_command,
     'ramble': handle_ramble_command,
+    'tweet': handle_tweet_command,
 }
 
 

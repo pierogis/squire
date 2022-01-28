@@ -83,5 +83,28 @@ if __name__ == "__main__":
         ]
     }
 
+    tweet_json = {
+        "name": "tweet",
+        "type": 1,
+        "description": "what would @{username} think about this",
+        "options": [
+            {
+                "name": "username",
+                "description": "twitter handle",
+                "type": 3,
+                "required": True,
+            },
+            {
+                "name": "artistic_license",
+                "description": "how creative to make the response",
+                "type": 10,
+                "required": False,
+                "min_value": 0.0,
+                "max_value": 1.0,
+            }
+        ]
+    }
+
     post_slash_command(lyrics_json, discord_application_id, discord_token)
     post_slash_command(ramble_json, discord_application_id, discord_token)
+    post_slash_command(tweet_json, discord_application_id, discord_token)

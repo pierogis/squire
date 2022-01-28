@@ -53,11 +53,37 @@ def lyrics(temperature: float):
 
 @app.command()
 @click.option('--temperature', default=0.8, help='creativity scale')
+def tweet(temperature: float):
+    try:
+        from squire import twitter
+
+        username = click.prompt('username', type=str)
+
+        twitter_bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
+        if twitter_bearer_token is None:
+            twitter_bearer_token = input("twitter bearer token:")
+
+        client = twitter.create_client(twitter_bearer_token)
+
+        set_openai_key()
+
+        generated_tweets = gpt3.generate_tweet(client, username, temperature=temperature)
+
+        print()
+        print("tweets:\n")
+        print(generated_tweets)
+
+    except ImportError as e:
+        print("tweepy package not installed: run `pip install squire[twitter]`")
+
+
+@app.command()
+@click.option('--temperature', default=0.8, help='creativity scale')
 def discord_bot(temperature: float):
     try:
-        from squire import bot
+        from squire import discord
 
-        client = bot.create_client(temperature)
+        client = discord.create_client(temperature)
 
         discord_token = os.environ.get("DISCORD_BOT_TOKEN")
 
