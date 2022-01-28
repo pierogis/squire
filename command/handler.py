@@ -30,7 +30,7 @@ def handle_lyrics_command(options: List[Dict[str, any]]) -> str:
     else:
         raise Exception("No artist option provided")
 
-    return generated_lyrics
+    return f"artist:\n{artist}\n\nlyrics:\n{generated_lyrics}"
 
 
 def handle_ramble_command(options: Optional[List[Dict[str, any]]]) -> str:
