@@ -1,4 +1,5 @@
 import os
+
 import click
 import openai
 
@@ -24,9 +25,11 @@ def app():
 
 
 @app.command()
+@click.option('--prompt', default=None)
 @click.option('--temperature', default=0.8, help='creativity scale')
-def ramble(temperature: float):
-    prompt: str = click.prompt('prompt', type=str, default='')
+def ramble(prompt: str, temperature: float):
+    if prompt is None:
+        prompt = click.prompt('prompt', type=str, default='')
 
     set_openai_key()
 
@@ -38,9 +41,11 @@ def ramble(temperature: float):
 
 
 @app.command()
+@click.option('--artist', default=None)
 @click.option('--temperature', default=0.8, help='creativity scale')
-def lyrics(temperature: float):
-    artist = click.prompt('artist', type=str)
+def lyrics(artist: str, temperature: float):
+    if artist is None:
+        artist = click.prompt('artist', type=str)
 
     set_openai_key()
 
@@ -52,12 +57,14 @@ def lyrics(temperature: float):
 
 
 @app.command()
+@click.option('--username', default=None)
 @click.option('--temperature', default=0.8, help='creativity scale')
-def tweet(temperature: float):
+def tweet(username: str, temperature: float):
     try:
         from squire import twitter
 
-        username = click.prompt('username', type=str)
+        if username is None:
+            username = click.prompt('username', type=str)
 
         twitter_bearer_token = os.environ.get("TWITTER_BEARER_TOKEN")
         if twitter_bearer_token is None:
